@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.1 — 2026-10-14
 Fixes from a dry run of every workflow on a synthetic brief.
 - `generate`: set up the `@/*` alias with `paths` only (TypeScript 6 rejects `baseUrl`), use `import.meta.dirname` in the Vite config, run a build before generating.
 - `verify`: design-system variants are checked per component (`Button variant="secondary"` is flagged when only Badge lists it) and are read inside JSX expressions.
