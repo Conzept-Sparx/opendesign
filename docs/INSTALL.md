@@ -6,7 +6,7 @@ OpenDesign has two parts:
 
 | Part | What it does | You install |
 |---|---|---|
-| The `opendesign` command | Sets up the spec folder, installs agent commands, checks your work | Step 3–4 below |
+| The `opendesign` command | Sets up the spec folder, installs agent commands, checks your work | Step 3 below |
 | A coding agent | Does the design thinking and writing: brief analysis, personas, specs, prototypes | Claude Code, Codex or OpenCode (step 2) |
 
 Commands below are for **macOS / Linux** (Terminal) and **Windows** (PowerShell). Where they differ, both are shown.
@@ -35,7 +35,7 @@ Close and reopen your terminal, then run `node -v` again to confirm.
 
 ## Step 2 — Install a coding agent
 
-You need at least one. For the designer sessions, Claude Code is the one the runbook uses.
+You need at least one. If you're not sure which, start with Claude Code.
 
 ### Claude Code (recommended)
 
@@ -75,54 +75,27 @@ Follow the install steps at [opencode.ai/docs](https://opencode.ai/docs). After 
 
 ---
 
-## Step 3 — Get OpenDesign
-
-Clone the repository somewhere permanent, for example your home folder or a `tools` folder. The `opendesign` command runs from here, so don't put it somewhere you clean out.
+## Step 3 — Install OpenDesign
 
 ```bash
-git clone <repo-url> opendesign
-cd opendesign
+npm install -g @conzept-sparx/opendesign@latest
 ```
 
-No git? On the GitHub page, choose **Code → Download ZIP**, unzip it, and open a terminal in the unzipped folder.
+This works the same on macOS, Linux and Windows. If you see a permission error (`EACCES`) on macOS or Linux, see Troubleshooting below rather than using `sudo`.
 
 ---
 
-## Step 4 — Build and install the command
-
-Inside the `opendesign` folder, run these three commands one at a time:
-
-```bash
-npm install
-npm run build
-npm link
-```
-
-| Command | What it does |
-|---|---|
-| `npm install` | Downloads the build tools (TypeScript). Takes under a minute. |
-| `npm run build` | Compiles OpenDesign into the `dist/` folder. |
-| `npm link` | Makes the `opendesign` command available in every terminal. |
-
----
-
-## Step 5 — Check the installation
+## Step 4 — Check the installation
 
 ```bash
 opendesign --version
 ```
 
-It should print `0.1.0`. Then run the built-in self-test from the `opendesign` folder:
-
-```bash
-npm test
-```
-
-The last line should read `All checks passed`.
+It should print a version number such as `0.1.0`.
 
 ---
 
-## Step 6 — Start your first project
+## Step 5 — Start your first project
 
 Create a project folder anywhere and set it up:
 
@@ -160,16 +133,11 @@ The first time you run `/od:generate`, the agent sets up a React prototype app i
 
 ## Updating
 
-When a newer version is available:
-
 ```bash
-cd ~/tools/opendesign           # your OpenDesign folder
-git pull
-npm install
-npm run build
+npm install -g @conzept-sparx/opendesign@latest
 ```
 
-There's no need to run `npm link` again. Then, inside each design project, refresh its agent commands:
+Then, inside each design project, refresh its agent commands:
 
 ```bash
 opendesign update
@@ -180,10 +148,24 @@ opendesign update
 ## Uninstalling
 
 ```bash
-npm unlink -g @conzeptsparx/opendesign
+npm uninstall -g @conzept-sparx/opendesign
 ```
 
-Then delete the `opendesign` folder. Your design projects keep their `opendesign/` spec folders; they're plain Markdown.
+Your design projects keep their `opendesign/` spec folders; they're plain Markdown.
+
+## Installing from source
+
+For contributors, or to try unreleased changes:
+
+```bash
+git clone https://github.com/Conzept-Sparx/opendesign.git opendesign
+cd opendesign
+npm install          # also builds OpenDesign
+npm link             # makes the opendesign command available everywhere
+npm test             # last line should read "All checks passed"
+```
+
+After pulling new changes, run `npm install` again to rebuild. To switch back to the released version, run `npm unlink -g @conzept-sparx/opendesign` and then the install command in step 3.
 
 ---
 
@@ -192,10 +174,10 @@ Then delete the `opendesign` folder. Your design projects keep their `opendesign
 | Problem | Fix |
 |---|---|
 | `opendesign: command not found` (or "not recognized" on Windows) | Close and reopen the terminal. If it still fails, run `npm config get prefix`; the `bin` folder inside it (on Windows, the folder itself) must be on your PATH. |
-| `EACCES` / permission denied during `npm link` (macOS / Linux) | Your Node install needs admin rights for global commands. Install Node with nvm (step 1) and repeat step 4. Avoid `sudo npm link`. |
+| `EACCES` / permission denied during `npm install -g` (macOS / Linux) | Your Node install needs admin rights for global packages. Install Node with nvm (step 1) and repeat step 3. Avoid `sudo`. |
 | `npm` scripts blocked on Windows ("running scripts is disabled") | In PowerShell, run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`, then reopen PowerShell. |
-| `Cannot find module ... dist/cli.js` | You skipped `npm run build`. Run it in the OpenDesign folder. |
+| `Cannot find module ... dist/cli.js` (source install) | Run `npm install` in the OpenDesign folder to rebuild. |
 | `/od:` commands don't appear in Claude Code | Make sure you started `claude` in the folder where you ran `opendesign init` (it should contain `.claude/commands/od/`). Restart Claude Code after running `init`. |
 | Codex doesn't pick up `$opendesign-…` | Check that `.codex/skills/` exists in the project, update Codex to the latest version, and restart it in the project folder. |
 | `No opendesign/config.json here` | You're not in a design project folder. `cd` into it, or run `opendesign init` first. |
-| `npm test` fails | Run `npm run build` first. If it still fails, open an issue on GitHub with the output. |
+| Something else | Open an issue at https://github.com/Conzept-Sparx/opendesign/issues with the command you ran and its output. |
