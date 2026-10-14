@@ -69,7 +69,7 @@ EV  →  P / G  →  EC  →  REQ  →  SCR (covers: [...])  →  code (data-req
 
 - Each REQ names the goals (G) or edge cases (EC) it serves.
 - Each screen spec lists the REQs it covers in its frontmatter.
-- Each generated element that satisfies a REQ carries `data-req="REQ-001"` (space-separated for several).
+- Each generated element that satisfies a REQ carries `data-req="REQ-001"` (space-separated for several). Requirements in the **Quality** table (accessibility, contrast, design-system use) are the exception: they apply to the whole screen, so they are checked in `critique`, not by tags. Don't tag a wrapper element with them.
 
 ## Prototype
 

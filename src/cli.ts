@@ -16,7 +16,7 @@ ${bold("Usage")}
   ${TOOL} status                      where the project stands, and what's next
   ${TOOL} verify [--json]             check traceability, design system and evidence
   ${TOOL} trace <ID>                  everything linked to an ID (REQ-006, G1, SCR-x…)
-  ${TOOL} new <screen|flow|concept|evidence> <slug>
+  ${TOOL} new <screen|flow|concept|evidence> <slug> [--flow <slug>] [--pattern <name>]
   ${TOOL} workflows                   list the agent workflows
 
 ${dim("Run inside your project folder. The design work happens in your coding agent;")}
@@ -49,7 +49,7 @@ function main() {
     case "status": status(root); return 0;
     case "verify": return verify(root, { json: !!opts.json });
     case "trace": trace(root, args[1] || ""); return 0;
-    case "new": create(root, args[1] || "", args[2] || ""); return 0;
+    case "new": create(root, args[1] || "", args[2] || "", { flow: str("flow"), pattern: str("pattern") }); return 0;
     case "workflows":
       for (const wf of loadWorkflows()) log(`  ${cyan(invocation("claude", wf.id).padEnd(17))} ${bold(wf.title)}\n  ${" ".repeat(17)} ${dim(wf.description.split(". ")[0])}`);
       return 0;

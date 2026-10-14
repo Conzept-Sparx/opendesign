@@ -119,9 +119,10 @@ A published version number can never be reused. Update `VERSION` in `src/constan
 
 In rough priority order:
 
-1. **Dry-run every workflow in Claude Code** on a real brief and fix what breaks. Highest priority
-   before the designer sessions. `/od:generate` prototype scaffolding (Vite + Tailwind + shadcn) is
-   the riskiest step.
+1. **Dry-run the workflows through the real slash commands** on a real brief. A first dry run
+   (2026-10-14, synthetic brief, workflows followed by hand) found and fixed the scaffolding and
+   verify problems in CHANGELOG "Unreleased"; it did not test how an agent interprets the skills in
+   a fresh session, or consistency across repeated generation.
 2. **Name decision.** open-design.ai is an existing open-source project in the same space, and the
    unrelated npm package `opendesign` may install a clashing `opendesign` command. Renaming means
    changing `constants.ts`, `package.json` (`name`, `bin`), docs, and publishing a new package.
@@ -129,9 +130,7 @@ In rough priority order:
 4. `verify`: screenshot every screen state with Playwright; a consistency score (generate the same
    spec several times and compare structure).
 5. Accept `artifact` as an alias for the `artefact` workflow.
-6. `status` doesn't yet count explore notes, wireframes or artefacts.
-7. Variant detection in `model.ts` is a simple regex; it will miss variants set through objects
-   or helpers.
-8. Import tokens from Figma Variables / Tokens Studio exports into `design-system.md`.
-9. More agents: Cursor, GitHub Copilot, Gemini CLI.
-10. Windows: install and CLI behaviour are untested.
+6. Variant detection in `model.ts` reads JSX attributes and `variant:` strings only; it will miss variants chosen through helpers or cva calls it can't attribute to a component.
+7. Import tokens from Figma Variables / Tokens Studio exports into `design-system.md`.
+8. More agents: Cursor, GitHub Copilot, Gemini CLI.
+9. Windows: install and CLI behaviour are untested.

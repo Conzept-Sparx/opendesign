@@ -1,7 +1,7 @@
 import { SPEC_DIR, TOOL } from "./constants";
 import path from "path";
 import { isFilled, load } from "./model";
-import { PKG_ROOT, read } from "./fsx";
+import { PKG_ROOT, listFiles, read } from "./fsx";
 import { check } from "./verify";
 import { bold, cyan, dim, green, log, yellow } from "./ui";
 import { invocation } from "./agents";
@@ -25,18 +25,26 @@ export function status(root: string) {
     ["screen", m.screens.length > 0, `${m.screens.length} screen specs · ${r.stats.inScreens}/${r.stats.reqs} requirements covered`],
     ["generate", r.stats.generated > 0, `${r.stats.generated}/${m.screens.length} screens generated`],
   ];
+  const count = (rel: string, re: RegExp) => listFiles(path.join(m.dir, rel), (p) => re.test(path.basename(p)) && !path.basename(p).startsWith("_")).length;
+  const critiques = count("critique", /\.md$/);
+  const rationales = count("rationale", /\.md$/);
+  const extras = [["explore notes", count("explore", /\.md$/)], ["wireframes", count("wireframes", /\.html$/)], ["artefacts", count("artefacts", /\.md$/)]]
+    .filter(([, n]) => n).map(([l, n]) => `${n} ${l}`).join(" · ");
+  steps.push(["critique", critiques > 0, `${critiques} critiques`], ["rationale", rationales > 0, `${rationales} rationale documents`]);
   const cfg = readConfig(root);
   const tool = cfg?.tools?.[0] || "claude";
   log();
   log(bold(`${cfg?.name || "Project"} — OpenDesign status`));
   log();
   for (const [id, done, detail] of steps) log(`  ${done ? green("●") : dim("○")} ${id.padEnd(13)} ${done ? detail : dim(detail)}`);
+  if (extras) log(`  ${dim("also: " + extras)}`);
   log();
   const fails = r.findings.filter((f) => f.level === "fail").length;
   const warns = r.findings.filter((f) => f.level === "warn").length;
   log(`  verify: ${r.status === "PASS" ? green("PASS") : yellow("FAIL")} ${dim(`(${fails} failures, ${warns} warnings)`)}`);
-  const next = steps.find(([, done]) => !done);
-  const suggestion = next ? next[0] : fails ? "verify" : "critique";
+  const generated = steps.find(([id]) => id === "generate")![1];
+  const next = steps.find(([id, done]) => !done && (generated || id !== "critique" && id !== "rationale"));
+  const suggestion = next ? next[0] : fails ? "verify" : "view";
   log(`  next:   ${cyan(invocation(tool, suggestion))}`);
   log();
 }

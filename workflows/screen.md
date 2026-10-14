@@ -10,7 +10,7 @@ description: Write a screen spec (opendesign/screens/<slug>.md) that a generator
    - **Frontmatter**: id, persona, flow, pattern, `covers: [REQ-…]`, and `code:` path for the generated file.
    - **Layout**: regions top to bottom. For each element: the exact design-system component, its content (real copy, not lorem ipsum), and the REQ it satisfies.
    - **Interactions**: what every control does, including disabled and validation rules.
-   - **States**: default, loading, empty, error, plus every edge-case state this screen owns (from EC ids).
+   - **States**: default, loading, empty, error, plus every edge-case state this screen owns (from EC ids). Every conditional element (offline notice, conflict warning, draft banner) needs its own row naming the trigger, so a generator never has to decide when it shows and the review bar can switch to it.
    - **Sample data**: realistic rows that exercise every state and status.
    - **Accessibility**: headings, labels, keyboard order, live regions, focus handling.
 3. Remove every decision a generator would otherwise have to make. If you can't decide something, add a Q to requirements.md and mark the element `pending Q<n>`.

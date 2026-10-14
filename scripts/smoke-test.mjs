@@ -60,6 +60,7 @@ ok(run(tmp, "verify").code === 0, "verify passes on a fresh project");
 const fx = fs.mkdtempSync(path.join(os.tmpdir(), "opendesign-fx-"));
 run(fx, "init", "--tools", "claude", "--name", "Fixture");
 const spec = (rel) => path.join(fx, "opendesign", rel);
+const readFileOf = (rel) => fs.readFileSync(spec(rel), "utf8");
 const edit = (rel, from, to) => fs.writeFileSync(spec(rel), fs.readFileSync(spec(rel), "utf8").replace(from, to));
 edit("users.md", "## P1 — <persona name>", "## P1 — Shopper");
 edit("users.md", "- G1 <goal> `[assumed]`", "- G1 Find a past order quickly `[assumed]`");
@@ -91,6 +92,46 @@ const res = run(fx, "verify");
 ok(res.code === 1 && res.out.includes("REQ-002"), "verify fails and names the missing REQ-002 tag");
 fs.writeFileSync(code, 'import { Dialog } from "@/components/ui/dialog";\n' + fs.readFileSync(code, "utf8"));
 ok(run(fx, "verify").out.includes("'dialog'"), "verify flags a component missing from the design system");
+
+fs.writeFileSync(code, fs.readFileSync(code, "utf8").replace('<ul data-req="REQ-001">', '<ul data-req="REQ-001"><Badge variant="outline"/><Button variant="destructive"/><Card variant={a ? "default" : "ghost"}/>'));
+const vv = run(fx, "verify").out;
+ok(vv.includes("variant 'destructive' on Button"), "verify flags a variant that exists in the table but not for that component");
+ok(vv.includes("variant 'outline' on Badge") && !vv.includes("variant 'outline' on Button"), "verify matches variants per component, not by name alone");
+ok(vv.includes("variant 'default' on Card") && vv.includes("variant 'ghost' on Card"), "verify reads variants inside JSX expressions");
+edit("requirements.md", "| REQ-002 | Explain", "| REQ-002 | retired — dropped. Explain");
+ok(run(fx, "verify").out.includes("still covers REQ-002, which is retired"), "verify warns when a screen still covers a retired REQ");
+
+// Quality requirements, mentions, flow and pattern checks, new-screen autofill, trace and status
+edit("requirements.md", "## Quality\n\n| ID | Requirement | Source | Serves |\n|---|---|---|---|",
+  "## Quality\n\n| ID | Requirement | Source | Serves |\n|---|---|---|---|\n| REQ-003 | Meets WCAG 2.2 AA contrast. | constraint | G1 |");
+edit("requirements.md", "| REQ-002 | retired — dropped. Explain", "| REQ-002 | Explain");
+fs.writeFileSync(code, fs.readFileSync(code, "utf8").replace(/<Badge[^>]*>|<Button variant="destructive"\/>|<Card variant=\{[^}]*\}\/>/g, "").replace('<div>', '<div data-req="REQ-002">'));
+edit("screens/order-history.md", "covers: [REQ-001, REQ-002]", "covers: [REQ-001, REQ-002, REQ-003]");
+fs.appendFileSync(spec("screens/order-history.md"), "\nContrast is REQ-003. Filters are REQ-001.\n");
+fs.writeFileSync(code, fs.readFileSync(code, "utf8").replace(/^import \{ Dialog \}.*\n/, ""));
+const q = run(fx, "verify");
+ok(q.code === 0 && q.out.includes("2/2 tagged in code"), "quality requirement needs no code tag");
+ok(readFileOf("verify-report.md").includes("REQ-003 (quality) | SCR-order-history | by review"), "report shows quality requirements as checked by review");
+edit("screens/order-history.md", "covers: [REQ-001, REQ-002, REQ-003]", "covers: [REQ-001, REQ-002]");
+ok(run(fx, "verify").out.includes("mentions REQ-003 but doesn't list it in covers"), "verify warns when a screen mentions a REQ it doesn't cover");
+edit("screens/order-history.md", "covers: [REQ-001, REQ-002]", "covers: [REQ-001, REQ-002, REQ-003]");
+ok(run(fx, "verify").out.includes("names flow FLOW-slug, which doesn't exist"), "verify warns about a placeholder flow");
+run(fx, "new", "flow", "reorder");
+run(fx, "new", "screen", "order-detail");
+ok(readFileOf("screens/order-detail.md").includes("flow: FLOW-reorder"), "new screen fills the only flow that exists");
+run(fx, "new", "flow", "refund");
+run(fx, "new", "screen", "refund-form", "--flow", "refund");
+ok(readFileOf("screens/refund-form.md").includes("flow: FLOW-refund"), "new screen accepts --flow");
+edit("decisions.md", "|---|---|---|---|---|---|", "|---|---|---|---|---|---|\n| DEC-001 | Newest first | oldest first | people want recent | REQ-001, SCR-order-history | 2026-01-01 |");
+const td = run(fx, "trace", "DEC-001");
+ok(td.out.includes("REQ-001") && td.out.includes("SCR-order-history"), "trace of a decision shows what it affects");
+const tp = run(fx, "trace", "P1");
+ok(tp.out.includes("G1") && tp.out.includes("REQ-001"), "trace of a persona shows goals and serving requirements");
+const st = run(fx, "status").out;
+ok(st.includes("0 critiques") && st.includes("0 rationale documents"), "status lists critique and rationale counts");
+fs.mkdirSync(spec("critique"), { recursive: true });
+fs.writeFileSync(spec("critique/order-history-2026-01-01.md"), "# Critique\n");
+ok(run(fx, "status").out.includes("1 critiques"), "status counts a critique file");
 
 fs.rmSync(tmp, { recursive: true, force: true });
 fs.rmSync(fx, { recursive: true, force: true });
