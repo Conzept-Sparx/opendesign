@@ -83,7 +83,7 @@ export function trace(root: string, id: string) {
     const screens = m.screens.filter((s) => s.covers.includes(id));
     if (!screens.length) log(yellow("    not covered by any screen yet"));
     for (const s of screens) {
-      const tag = !s.codeExists ? dim("not generated") : s.tags.has(id) ? green("tagged in code") : red("NOT tagged in code");
+      const tag = !s.codeExists ? dim("not generated") : r.quality ? dim("checked by review") : s.tags.has(id) ? green("tagged in code") : red("NOT tagged in code");
       log(`    ${cyan(s.id)}  ${tag}${s.codeExists ? dim(`  ${s.code}`) : ""}`);
     }
     const tagged = m.codeFiles.filter((c) => c.tags.includes(id));
@@ -99,10 +99,38 @@ export function trace(root: string, id: string) {
     reqs.forEach((r) => log(`    ${cyan(r.id)} ${dim(clip(r.text, 100))}`));
     log();
   }
+  if (kind === "Decision" && def) {
+    const cells = cleanRow(def.text).split(" · ");
+    log(bold("  Decision"));
+    if (cells[2]) log(`    options: ${dim(clip(cells[2], 100))}`);
+    if (cells[3]) log(`    why: ${dim(clip(cells[3], 100))}`);
+    log(bold("  Affects"));
+    const affects = (cells[4] || "").match(/\b(REQ-\d+|SCR-[\w-]+|FLOW-[\w-]+|EC-\d+|G\d+|P\d+)\b/g) || [];
+    if (affects.length) affects.forEach((a) => log(`    ${cyan(a)}`));
+    else log(yellow("    no IDs listed: say which REQ or screen this decision affects"));
+    log();
+  }
+  if (kind === "Persona") {
+    const p = m.personas.find((x) => x.id === id);
+    if (p) {
+      log(bold("  Goals"));
+      p.goals.forEach((g) => log(`    ${cyan(g)} ${dim(clip(goalText(g), 90))}`));
+      const reqs = m.reqs.filter((r) => !r.retired && r.serves.some((x) => p.goals.includes(x)));
+      log(bold("  Requirements serving their goals"));
+      if (!reqs.length) log(yellow("    none yet"));
+      reqs.forEach((r) => log(`    ${cyan(r.id)} ${dim(clip(r.text, 90))}`));
+      const screens = m.screens.filter((s) => s.persona === id);
+      if (screens.length) { log(bold("  Screens")); screens.forEach((s) => log(`    ${cyan(s.id)}`)); }
+      log(`  evidence: ${p.observed} observed · ${p.research} research · ${p.assumed} assumed`);
+      log();
+    }
+  }
   if (kind === "Screen") {
     const s = m.screens.find((x) => x.id === id);
     if (s) {
       log(bold("  Covers"));
+      const quality = s.covers.filter((c) => m.reqs.find((r) => r.id === c)?.quality);
+      if (quality.length) log(dim(`    ${quality.join(", ")} are quality requirements: checked in critique, not by tags`));
       log(`    ${s.covers.join(", ") || yellow("nothing yet")}`);
       log(`    code: ${s.code || dim("—")} ${!s.code ? "" : !s.codeExists ? dim("(not generated)") : `${dim("·")} ${s.covers.filter((c) => s.tags.has(c)).length}/${s.covers.length} tagged`}`);
       log();

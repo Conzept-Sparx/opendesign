@@ -8,7 +8,7 @@ export interface Finding { level: "fail" | "warn"; check: string; message: strin
 export interface Result {
   status: "PASS" | "FAIL";
   findings: Finding[];
-  coverage: { id: string; screens: string[]; tagged: boolean | null; retired: boolean }[];
+  coverage: { id: string; screens: string[]; tagged: boolean | null; retired: boolean; quality: boolean }[];
   stats: { reqs: number; inScreens: number; taggedOfCovered: number; covered: number; screens: number; generated: number };
   evidence: { id: string; observed: number; research: number; assumed: number }[];
 }
@@ -19,6 +19,8 @@ export function check(m: Model): Result {
   const warn = (check: string, message: string) => findings.push({ level: "warn", check, message });
   const reqIds = new Set(m.reqs.map((r) => r.id));
   const active = m.reqs.filter((r) => !r.retired);
+  const qualityIds = new Set(m.reqs.filter((r) => r.quality).map((r) => r.id));
+  const retiredIds = new Set(m.reqs.filter((r) => r.retired).map((r) => r.id));
 
   for (const id of m.duplicates) fail("ids", `${id} is defined more than once`);
 
@@ -27,10 +29,15 @@ export function check(m: Model): Result {
   let generated = 0;
   for (const s of m.screens) {
     for (const r of s.covers) if (!reqIds.has(r)) fail("trace", `${s.id} covers ${r}, which is not in requirements.md`);
+    for (const r of s.covers) if (retiredIds.has(r)) warn("trace", `${s.id} still covers ${r}, which is retired; remove it from covers and from the code`);
+    for (const r of s.mentioned) if (reqIds.has(r) && !s.covers.includes(r) && !retiredIds.has(r)) warn("trace", `${s.id} mentions ${r} but doesn't list it in covers`);
+    if (s.flow && !m.flows.includes(s.flow)) warn("trace", `${s.id} names flow ${s.flow}, which doesn't exist in flows/`);
+    if (s.pattern && m.patterns.length && !m.patterns.includes(s.pattern)) warn("design-system", `${s.id} names pattern ${s.pattern}, which isn't defined in design-system.md`);
     if (!s.code) { warn("trace", `${s.id} has no code: path in its frontmatter`); continue; }
     if (!s.codeExists) { warn("trace", `${s.id} is not generated yet (${s.code} doesn't exist)`); continue; }
     generated++;
     for (const r of s.covers) {
+      if (retiredIds.has(r) || qualityIds.has(r)) continue;
       if (s.tags.has(r)) covered++;
       else fail("trace", `${s.id} lists ${r} but no element in ${s.code} carries data-req="${r}"`);
     }
@@ -41,7 +48,7 @@ export function check(m: Model): Result {
   const coverage = m.reqs.map((r) => {
     const screens = m.screens.filter((s) => s.covers.includes(r.id));
     const gen = screens.filter((s) => s.codeExists);
-    return { id: r.id, screens: screens.map((s) => s.id), tagged: gen.length ? gen.every((s) => s.tags.has(r.id)) : null, retired: r.retired };
+    return { id: r.id, screens: screens.map((s) => s.id), tagged: gen.length ? gen.every((s) => s.tags.has(r.id)) : null, retired: r.retired, quality: r.quality };
   });
   for (const c of coverage) if (!c.retired && c.screens.length === 0 && m.screens.length > 0) warn("trace", `${c.id} isn't covered by any screen yet`);
 
@@ -60,8 +67,15 @@ export function check(m: Model): Result {
     }
   }
   if (m.variants.size) {
-    for (const c of m.codeFiles) for (const v of new Set(c.variants)) {
-      if (!m.variants.has(v)) warn("design-system", `${c.file} uses variant '${v}', which isn't listed in design-system.md`);
+    for (const c of m.codeFiles) {
+      const seen = new Set<string>();
+      for (const { component, variant } of c.variants) {
+        const key = `${component}|${variant}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        if (!m.variants.has(variant)) warn("design-system", `${c.file} uses variant '${variant}', which isn't listed in design-system.md`);
+        else if (component && !m.variantPairs.has(`${component.toLowerCase()}|${variant}`)) warn("design-system", `${c.file} uses variant '${variant}' on ${component}, but design-system.md doesn't list it for ${component}`);
+      }
     }
   }
 
@@ -74,7 +88,7 @@ export function check(m: Model): Result {
   }
 
   const coveredReqs = new Set(m.screens.flatMap((s) => s.covers));
-  const totalCovers = m.screens.filter((s) => s.codeExists).reduce((n, s) => n + s.covers.length, 0);
+  const totalCovers = m.screens.filter((s) => s.codeExists).reduce((n, s) => n + s.covers.filter((c) => !retiredIds.has(c) && !qualityIds.has(c)).length, 0);
   return {
     status: findings.some((x) => x.level === "fail") ? "FAIL" : "PASS",
     findings,
@@ -101,7 +115,9 @@ function report(m: Model, r: Result): string {
     "",
     "| Requirement | Screens | Tagged in code |",
     "|---|---|---|",
-    ...r.coverage.map((c) => `| ${c.id}${c.retired ? " (retired)" : ""} | ${c.screens.join(", ") || "—"} | ${c.screens.length ? yes(c.tagged) : "—"} |`),
+    ...r.coverage.map((c) => `| ${c.id}${c.retired ? " (retired)" : c.quality ? " (quality)" : ""} | ${c.screens.join(", ") || "—"} | ${!c.screens.length ? "—" : c.quality ? "by review" : yes(c.tagged)} |`),
+    "",
+    "_Quality requirements are checked in `critique`, not by tags: a tag on a wrapper element proves nothing about contrast or keyboard access._",
     "",
     "## Persona evidence",
     "",

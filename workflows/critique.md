@@ -9,7 +9,7 @@ description: Critique a generated screen against its spec, usability heuristics 
 1. Read the screen spec, its REQs, users.md and the generated code. If you can run the prototype, look at every state.
 2. Review against:
    - **Spec fidelity**: anything built that the spec doesn't describe, or described but missing.
-   - **Requirements**: each covered REQ: met, partly met, not met.
+   - **Requirements**: each covered REQ: met, partly met, not met. Quality requirements (accessibility, contrast, design-system use) are not proven by `data-req` tags, so check each one here: measure contrast, tab through the screen, and read the code for off-system components.
    - **Usability**: Nielsen's 10 heuristics, applied to concrete elements.
    - **Accessibility**: WCAG 2.2 AA (contrast, labels, keyboard, focus, status not by colour alone).
    - **Persona fit**: would P<n>, with their context, succeed at their goals here?
