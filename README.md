@@ -34,14 +34,13 @@ The prototype is for review and handoff, not production. Developers rebuild from
 
 ## Install
 
-Requires Node.js 18+ and at least one of Claude Code, Codex or OpenCode. Full step-by-step guide, including installing the agents and troubleshooting: [docs/INSTALL.md](docs/INSTALL.md).
+Requires Node.js 18+ and at least one of Claude Code, Codex or OpenCode.
 
 ```bash
-# Until the package is published, install from source:
-git clone <repo-url> opendesign && cd opendesign
-npm install && npm run build && npm link
-opendesign --version
+npm install -g @conzept-sparx/opendesign@latest
 ```
+
+Check it worked with `opendesign --version`. The full step-by-step guide, including installing a coding agent and troubleshooting, is in [docs/INSTALL.md](docs/INSTALL.md).
 
 ## Quick start
 
