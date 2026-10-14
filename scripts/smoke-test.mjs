@@ -20,7 +20,7 @@ const ok = (cond, msg) => { console.log(`${cond ? "ok  " : "FAIL"} ${msg}`); if 
 const has = (dir, rel) => fs.existsSync(path.join(dir, rel));
 
 // 0. version
-ok(run(root, "--version").out.trim() === "0.1.0", "--version prints the version");
+ok(run(root, "--version").out.trim() === JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8")).version, "--version prints the package version");
 
 // 1. init with all tools
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "opendesign-"));

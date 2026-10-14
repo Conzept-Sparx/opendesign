@@ -1,6 +1,6 @@
 {
   "name": "@conzept-sparx/opendesign",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Spec-driven UX for AI coding agents: brief, research, personas, journeys, requirements, flows and screen specs that generate traceable React prototypes.",
   "repository": {
     "type": "git",
