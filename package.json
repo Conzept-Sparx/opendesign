@@ -1,0 +1,40 @@
+{
+  "name": "@conzeptsparx/opendesign",
+  "version": "0.1.0",
+  "description": "Spec-driven UX for AI coding agents: brief, research, personas, journeys, requirements, flows and screen specs that generate traceable React prototypes.",
+  "bin": {
+    "opendesign": "dist/cli.js"
+  },
+  "main": "dist/cli.js",
+  "files": [
+    "dist",
+    "templates",
+    "workflows",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "node scripts/smoke-test.mjs",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "ux",
+    "design",
+    "spec-driven",
+    "ai",
+    "claude-code",
+    "codex",
+    "opencode",
+    "prototype",
+    "traceability"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.0"
+  }
+}

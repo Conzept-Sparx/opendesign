@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframe — SCR-slug</title>
+<style>
+  /* OpenDesign wireframe kit: greyscale, low fidelity, no external resources. */
+  :root { --ink:#1f1f1f; --mid:#6b6b6b; --line:#bdbdbd; --fill:#ececec; --paper:#fafafa; --note:#1f1f1f; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; color:var(--ink); background:#e4e4e4; }
+  .wf-top { display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; padding:12px 16px; background:#fff; border-bottom:1px solid var(--line); }
+  .wf-top h1 { margin:0; font-size:15px; }
+  .wf-top small { color:var(--mid); }
+  .wf-tabs { display:flex; gap:4px; flex-wrap:wrap; }
+  .wf-tabs button { font:inherit; padding:4px 10px; border:1px solid var(--line); background:#fff; border-radius:4px; cursor:pointer; }
+  .wf-tabs button[aria-pressed="true"] { background:var(--ink); color:#fff; border-color:var(--ink); }
+  .wf-layout { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:16px; padding:16px; max-width:1400px; margin:0 auto; }
+  @media (max-width: 900px) { .wf-layout { grid-template-columns:minmax(0,1fr); } }
+  .wf-canvas { background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:20px; min-width:0; }
+  .wf-state[hidden] { display:none; }
+  .wf-region { border:1px dashed var(--line); border-radius:4px; padding:12px; margin-bottom:12px; position:relative; }
+  .wf-region > .wf-label { position:absolute; top:-9px; left:8px; background:var(--paper); padding:0 4px; font-size:11px; color:var(--mid); text-transform:uppercase; letter-spacing:.05em; }
+  .wf-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .wf-row.between { justify-content:space-between; }
+  .wf-h { font-size:20px; font-weight:600; margin:0; }
+  .wf-muted { color:var(--mid); font-size:13px; }
+  .wf-box { background:var(--fill); border:1px solid var(--line); border-radius:4px; padding:6px 10px; min-height:32px; display:inline-flex; align-items:center; gap:6px; }
+  .wf-input { background:#fff; border:1px solid var(--line); border-radius:4px; padding:6px 10px; min-width:160px; color:var(--mid); }
+  .wf-btn { border:1.5px solid var(--ink); border-radius:4px; padding:5px 12px; background:#fff; font-weight:500; }
+  .wf-btn.primary { background:var(--ink); color:#fff; }
+  .wf-btn.ghost { border-color:transparent; text-decoration:underline; }
+  .wf-chip { border:1px solid var(--line); border-radius:999px; padding:3px 10px; background:#fff; font-size:13px; }
+  .wf-chip.on { background:var(--ink); color:#fff; border-color:var(--ink); }
+  .wf-badge { border:1px solid var(--mid); border-radius:999px; padding:1px 8px; font-size:12px; }
+  .wf-table-wrap { overflow-x:auto; }
+  .wf-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .wf-table th, .wf-table td { border-bottom:1px solid var(--line); padding:8px; text-align:left; white-space:nowrap; }
+  .wf-table th { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--mid); }
+  .wf-empty { text-align:center; padding:40px 12px; border:1px dashed var(--line); border-radius:4px; color:var(--mid); }
+  .wf-skel { display:inline-block; height:12px; width:80px; background:var(--fill); border-radius:3px; }
+  .n { display:inline-grid; place-items:center; width:18px; height:18px; border-radius:50%; background:var(--note); color:#fff; font-size:10px; font-weight:700; vertical-align:middle; margin-left:4px; }
+  .wf-notes { background:#fff; border:1px solid var(--line); border-radius:6px; padding:16px; align-self:start; position:sticky; top:16px; }
+  .wf-notes h2 { font-size:13px; margin:0 0 8px; text-transform:uppercase; letter-spacing:.05em; color:var(--mid); }
+  .wf-notes ol { margin:0; padding-left:20px; }
+  .wf-notes li { margin-bottom:8px; }
+  .wf-notes code { font-size:11px; background:var(--fill); padding:1px 4px; border-radius:3px; }
+  :focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
+</style>
+</head>
+<body>
+<header class="wf-top">
+  <div><h1>SCR-slug — Screen name</h1><small>Wireframe from opendesign/screens/slug.md · low fidelity</small></div>
+  <div class="wf-tabs" role="group" aria-label="State">
+    <button type="button" data-state="default" aria-pressed="true">Default</button>
+    <button type="button" data-state="loading" aria-pressed="false">Loading</button>
+    <button type="button" data-state="empty" aria-pressed="false">Empty</button>
+    <button type="button" data-state="error" aria-pressed="false">Error</button>
+  </div>
+</header>
+<main class="wf-layout">
+  <section class="wf-canvas" aria-label="Wireframe">
+    <div class="wf-state" data-state="default">
+      <div class="wf-region"><span class="wf-label">R1 Region</span>
+        <p class="wf-h">Title <span class="n">1</span></p>
+      </div>
+    </div>
+    <div class="wf-state" data-state="loading" hidden><div class="wf-region"><span class="wf-label">Loading</span><span class="wf-skel"></span></div></div>
+    <div class="wf-state" data-state="empty" hidden><div class="wf-empty">Empty state message</div></div>
+    <div class="wf-state" data-state="error" hidden><div class="wf-region"><span class="wf-label">Error</span>Error message <span class="wf-btn">Try again</span></div></div>
+  </section>
+  <aside class="wf-notes" aria-label="Annotations">
+    <h2>Annotations</h2>
+    <ol>
+      <li>What this element does. <code>REQ-001</code></li>
+    </ol>
+  </aside>
+</main>
+<script>
+  document.querySelectorAll(".wf-tabs button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      document.querySelectorAll(".wf-tabs button").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+      document.querySelectorAll(".wf-state").forEach(function (s) { s.hidden = s.dataset.state !== b.dataset.state; });
+    });
+  });
+</script>
+</body>
+</html>
