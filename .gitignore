@@ -3,3 +3,17 @@ dist/
 .DS_Store
 *.log
 .smoke/
+
+# Agent instructions and settings (local to each developer)
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.md
+GEMINI.md
+.claude/
+.codex/
+.opencode/
+.cursor/
+
+# What `opendesign init` creates; never run it in this repo's root
+/opendesign/
+/prototype/
